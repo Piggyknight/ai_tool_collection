@@ -1,0 +1,136 @@
+version: 2
+project_name: red-cli
+
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+
+# after:
+#   hooks:
+#     - ./script/apt.sh
+
+release:
+  prerelease: auto
+  name_template: "v{{.Version}}"
+  draft: false
+  mode: "keep-existing"
+
+signs:
+  - artifacts: all
+    args: ["--batch", "-u", "{{ .Env.GPG_FINGERPRINT }}", "--output", "${signature}", "--detach-sign", "${artifact}"]
+
+builds:
+  - id: macos
+    goos: [darwin]
+    goarch: [amd64, arm64]
+    binary: red-cli
+    main: ./cmd/red
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{time "2006-01-02"}}
+
+  - id: linux
+    goos: [linux]
+    goarch: [amd64, arm64, 386]
+    env:
+      - CGO_ENABLED=0
+    binary: red-cli
+    main: ./cmd/red
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{time "2006-01-02"}}
+
+  - id: windows
+    goos: [windows]
+    goarch: [amd64, arm64, 386]
+    binary: red-cli
+    main: ./cmd/red
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{time "2006-01-02"}}
+
+universal_binaries:
+  - id: red-cli
+    name_template: red-cli
+    replace: true
+
+archives:
+  - id: red-cli
+    ids: [macos, linux, windows]
+    formats: [tar.gz]
+    files:
+      - README.md
+      - LICENSE
+
+changelog:
+  sort: desc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^build:'
+
+scoops:
+  - repository:
+      owner: mrjefflarry
+      name: redmine-cli
+    homepage: "https://github.com/mrjefflarry/redmine-cli"
+    description: "Redmine CLI"
+
+nfpms:
+  - vendor: mrjefflarry
+    homepage: https://github.com/mrjefflarry/redmine-cli
+    maintainer: Jeff Hägerman
+    license: MIT
+    description: Redmine CLI for interacting with Redmine Servers
+    formats:
+      - deb
+      - rpm
+      - archlinux
+    recommends:
+      - less
+      - nano
+
+
+# sandbox with snap does not work well when open nano or less from red-cli
+# drop support as of now, use apt instead
+# could use confinement as "classic" then it should work, need to apply for it at snap forum
+#snapcrafts:
+#  - summary: Redmine CLI
+#    name: red-cli
+#    publish: false
+#    description: Redmine CLI for interacting with Redmine Servers
+#    grade: stable
+#    confinement: strict
+#    apps:
+#      red-cli:
+#        plugs: [ "home", "network" ]
+
+brews:
+  - repository:
+      owner: mrjefflarry
+      name: redmine-cli
+    homepage: https://github.com/mrjefflarry/redmine-cli
+    description: "Redmine CLI"
+    install: |-
+      bin.install "red-cli"
+    test: |
+      system "#{bin}/red-cli -v"
+
+homebrew_casks:
+  - name: red-cli
+    repository:
+      owner: mrjefflarry
+      name: redmine-cli
+    homepage: https://github.com/mrjefflarry/redmine-cli
+    description: "Redmine CLI"
+    directory: Casks # or remove this option
+    # make the old formula conflict with the cask:
+    # conflicts:
+    #   formula: red-cli
+    # if your app/binary isn't signed and notarized, you'll need this:
+    hooks:
+      post:
+        install: |
+          if system_command("/usr/bin/xattr", args: ["-h"]).exit_status == 0
+            # replace 'red-cli' with the actual binary name
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/red-cli"]
+          end
