@@ -49,9 +49,89 @@ export const ChangeMetadataSchema = z.object({
       message: 'created must be YYYY-MM-DD format',
     })
     .optional(),
+
+  // Optional: Redmine integration metadata (one-way sync)
+  redmine: z.object({
+    instance: z.string().optional(),
+    issueId: z.number().optional(),
+    versionId: z.number().optional(),
+    syncStatus: z.enum(['pending', 'synced', 'failed', 'outdated']).optional(),
+    lastSync: z.string().optional(),
+    lastSyncBy: z.string().optional(),
+    tasks: z.array(z.object({
+      name: z.string(),
+      issueId: z.number().optional(),
+      status: z.string(),
+      order: z.number(),
+    })).optional(),
+  }).optional(),
 });
 
 export type ChangeMetadata = z.infer<typeof ChangeMetadataSchema>;
+
+// Sprint metadata schema
+export const SprintMetadataSchema = z.object({
+  name: z.string().min(1),
+  created: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, {
+      message: 'created must be YYYY-MM-DD format',
+    })
+    .optional(),
+  status: z.enum(['active', 'closed', 'archived']).default('active'),
+  dueDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, {
+      message: 'dueDate must be YYYY-MM-DD format',
+    })
+    .optional(),
+
+  // Redmine integration metadata
+  redmine: z.object({
+    instance: z.string().optional(),
+    versionId: z.number().optional(),
+    projectId: z.number().optional(),
+  }).optional(),
+
+  // Stories/Changes in this sprint
+  changes: z.array(z.object({
+    name: z.string(),
+    issueId: z.number().optional(),
+  })).optional(),
+});
+
+export type SprintMetadata = z.infer<typeof SprintMetadataSchema>;
+
+// Bug metadata schema
+export const BugMetadataSchema = z.object({
+  title: z.string().min(1),
+  severity: z.enum(['critical', 'major', 'minor', 'trivial']).default('major'),
+  status: z.enum(['new', 'in-progress', 'fixed', 'verified']).default('new'),
+  created: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, {
+      message: 'created must be YYYY-MM-DD format',
+    })
+    .optional(),
+  resolved: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, {
+      message: 'resolved must be YYYY-MM-DD format',
+    })
+    .optional(),
+
+  // Related items
+  relatedChange: z.string().optional(),
+  relatedTask: z.string().optional(),
+
+  // Redmine integration metadata
+  redmine: z.object({
+    instance: z.string().optional(),
+    issueId: z.number().optional(),
+  }).optional(),
+});
+
+export type BugMetadata = z.infer<typeof BugMetadataSchema>;
 
 // Runtime state types (not Zod - internal only)
 

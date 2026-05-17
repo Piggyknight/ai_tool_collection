@@ -8,7 +8,13 @@ import { UpdateCommand } from '../core/update.js';
 import { ListCommand } from '../core/list.js';
 import { ArchiveCommand } from '../core/archive.js';
 import { ViewCommand } from '../core/view.js';
-import { registerSpecCommand } from '../commands/spec.js';
+import { registerSpecCommand } from '../commands/spec/index.js';
+import { registerSprintCommand } from '../commands/sprint/index.js';
+import { registerRedmineCommand } from '../commands/redmine/index.js';
+import { registerStoryCommand } from '../commands/story/index.js';
+import { registerBugCommand } from '../commands/bug/index.js';
+import { registerTaskCommand } from '../commands/task/index.js';
+import { registerReviewCommand } from '../commands/review/index.js';
 import { ChangeCommand } from '../commands/change.js';
 import { ValidateCommand } from '../commands/validate.js';
 import { ShowCommand } from '../commands/show.js';
@@ -508,5 +514,23 @@ newCmd
       process.exit(1);
     }
   });
+
+// Register Redmine integration commands
+registerRedmineCommand(program);
+
+// Register Sprint commands
+registerSprintCommand(program);
+
+// Register Story commands
+registerStoryCommand(program);
+
+// Register Bug commands
+registerBugCommand(program);
+
+// Register Task commands
+registerTaskCommand(program);
+
+// Register Review commands
+registerReviewCommand(program);
 
 program.parse();
