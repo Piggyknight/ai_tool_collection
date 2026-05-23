@@ -50,6 +50,15 @@ export function getApplyChangeSkillTemplate(): SkillTemplate {
    - 如果 \`state: "all_done"\`：祝贺，建议归档
    - 否则：继续实现
 
+   **Redmine 状态同步（如果已关联）：**
+   - 读取 \`openspec/changes/<name>/.openspec.yaml\`
+   - 如果存在 \`redmine.issueId\`，在开始第一个实现任务前运行：
+     \`\`\`bash
+     red-cli issue edit <issue-id> --status "Applying"
+     \`\`\`
+   - 如果状态更新成功，显示："✓ Redmine issue #<issue-id> 已更新为 Applying"
+   - 如果更新失败，清楚显示失败原因；不要隐藏同步失败，但可以在用户确认后继续本地实现
+
 4. **阅读上下文文件**
 
    阅读 apply instructions 输出中 \`contextFiles\` 列出的每个文件路径。
@@ -206,6 +215,15 @@ export function getOpsxApplyCommandTemplate(): CommandTemplate {
    - 如果 \`state: "blocked"\`（缺少产出物）：显示消息，建议使用 \`/opsx:continue\`
    - 如果 \`state: "all_done"\`：祝贺，建议归档
    - 否则：继续实现
+
+   **Redmine 状态同步（如果已关联）：**
+   - 读取 \`openspec/changes/<name>/.openspec.yaml\`
+   - 如果存在 \`redmine.issueId\`，在开始第一个实现任务前运行：
+     \`\`\`bash
+     red-cli issue edit <issue-id> --status "Applying"
+     \`\`\`
+   - 如果状态更新成功，显示："✓ Redmine issue #<issue-id> 已更新为 Applying"
+   - 如果更新失败，清楚显示失败原因；不要隐藏同步失败，但可以在用户确认后继续本地实现
 
 4. **阅读上下文文件**
 

@@ -66,7 +66,19 @@ export function getArchiveChangeSkillTemplate(): SkillTemplate {
 
    如果用户选择同步，使用 Task tool（subagent_type: "general-purpose", prompt: "Use Skill tool to invoke openspec-sync-specs for change '<name>'. Delta spec analysis: <include the analyzed delta spec summary>"）。无论选择如何，都继续归档。
 
-5. **执行归档**
+5. **准备 Redmine 归档说明（如果已关联）**
+
+   读取 \`openspec/changes/<name>/.openspec.yaml\`。如果存在 \`redmine.issueId\`，在移动目录前整理一份 Markdown note，写入临时文件（例如 \`openspec/changes/<name>/redmine-archive-note.md\` 或系统临时目录）：
+   - 变更名称、Schema、Redmine issue ID、归档目标路径
+   - 本次整体改动摘要：阅读 \`proposal.md\`、\`design.md\`、\`tasks.md\`、\`specs/**/spec.md\` 以及其他 apply instructions 中列出的上下文文件后提炼
+   - 已完成任务和仍需关注的未完成项
+   - 代码改动摘要：如果在 git 仓库中，运行 \`git diff --stat\` 和 \`git diff --name-status\`，把关键文件和变更类型整理进 note
+   - 相关文档清单：列出 proposal/design/tasks/spec 文件路径及它们对 QA 有用的要点
+   - QA 检查建议：基于规格、任务和实现改动生成测试关注点，说明哪些行为需要回归、哪些边界条件需要验证
+
+   note 面向后续 QA 使用，避免只写"已完成"；必须包含足够上下文让 QA 能据此检查并生成测试。
+
+6. **执行归档**
 
    如果归档目录不存在，则创建它：
    \`\`\`bash
@@ -83,13 +95,26 @@ export function getArchiveChangeSkillTemplate(): SkillTemplate {
    mv openspec/changes/<name> openspec/changes/archive/YYYY-MM-DD-<name>
    \`\`\`
 
-6. **显示摘要**
+   **归档成功后的 Redmine 同步（如果已关联）：**
+   - 先添加归档 note：
+     \`\`\`bash
+     red-cli issue note <issue-id> --message-file <note-file>
+     \`\`\`
+   - 再将 issue 推进到归档后的默认下一阶段：
+     \`\`\`bash
+     red-cli issue edit <issue-id> --status "Code Review"
+     \`\`\`
+   - 只有在本地归档成功后才更新 Redmine；如果本地归档失败，不要推进 Redmine 状态
+   - 如果 Redmine note 或状态同步失败，清楚显示失败原因和 note 文件位置，方便用户重试；不要隐瞒同步失败
+
+7. **显示摘要**
 
    显示归档完成摘要，包括：
    - 变更名称
    - 使用的 Schema
    - 归档位置
    - 规范是否已同步（如果适用）
+   - Redmine note 和状态同步结果（如果适用）
    - 关于任何警告的说明（未完成的产出物/任务）
 
 **成功时的输出**
@@ -181,7 +206,19 @@ export function getOpsxArchiveCommandTemplate(): CommandTemplate {
 
    如果用户选择同步，执行 \`/opsx:sync\` 逻辑。无论选择如何都继续归档。
 
-5. **执行归档**
+5. **准备 Redmine 归档说明（如果已关联）**
+
+   读取 \`openspec/changes/<name>/.openspec.yaml\`。如果存在 \`redmine.issueId\`，在移动目录前整理一份 Markdown note，写入临时文件（例如 \`openspec/changes/<name>/redmine-archive-note.md\` 或系统临时目录）：
+   - 变更名称、Schema、Redmine issue ID、归档目标路径
+   - 本次整体改动摘要：阅读 \`proposal.md\`、\`design.md\`、\`tasks.md\`、\`specs/**/spec.md\` 以及其他 apply instructions 中列出的上下文文件后提炼
+   - 已完成任务和仍需关注的未完成项
+   - 代码改动摘要：如果在 git 仓库中，运行 \`git diff --stat\` 和 \`git diff --name-status\`，把关键文件和变更类型整理进 note
+   - 相关文档清单：列出 proposal/design/tasks/spec 文件路径及它们对 QA 有用的要点
+   - QA 检查建议：基于规格、任务和实现改动生成测试关注点，说明哪些行为需要回归、哪些边界条件需要验证
+
+   note 面向后续 QA 使用，避免只写"已完成"；必须包含足够上下文让 QA 能据此检查并生成测试。
+
+6. **执行归档**
 
    如果归档目录不存在，则创建它：
    \`\`\`bash
@@ -198,13 +235,26 @@ export function getOpsxArchiveCommandTemplate(): CommandTemplate {
    mv openspec/changes/<name> openspec/changes/archive/YYYY-MM-DD-<name>
    \`\`\`
 
-6. **显示摘要**
+   **归档成功后的 Redmine 同步（如果已关联）：**
+   - 先添加归档 note：
+     \`\`\`bash
+     red-cli issue note <issue-id> --message-file <note-file>
+     \`\`\`
+   - 再将 issue 推进到归档后的默认下一阶段：
+     \`\`\`bash
+     red-cli issue edit <issue-id> --status "Code Review"
+     \`\`\`
+   - 只有在本地归档成功后才更新 Redmine；如果本地归档失败，不要推进 Redmine 状态
+   - 如果 Redmine note 或状态同步失败，清楚显示失败原因和 note 文件位置，方便用户重试；不要隐瞒同步失败
+
+7. **显示摘要**
 
    显示归档完成摘要，包括：
    - 变更名称
    - 使用的 Schema
    - 归档位置
    - 规格说明同步状态（已同步 / 跳过同步 / 无增量规格说明）
+   - Redmine note 和状态同步结果（如果适用）
    - 任何警告的注释（未完成的产出物/任务）
 
 **成功时的输出**

@@ -124,6 +124,11 @@ func displayIssueGET(r *config.Red_t, cmd *cobra.Command, path string) {
 		return
 	}
 
+	if jsonOutput, _ := cmd.Flags().GetBool(util.FLAG_JSON); jsonOutput {
+		print.Info("%s", body)
+		return
+	}
+
 	if err := json.Unmarshal(body, &viewIssue); err != nil {
 		print.Debug(r, err.Error())
 		print.Error("StatusCode %d, %s", status, "Could not parse and read response from server")
@@ -158,6 +163,7 @@ func cmdIssueView(r *config.Red_t) *cobra.Command {
 	}
 
 	cmd.PersistentFlags().BoolP(FLAG_JOURNALS, FLAG_JOURNALS_S, false, "Display journals")
+	cmd.PersistentFlags().Bool(util.FLAG_JSON, false, "Output in JSON format")
 
 	return cmd
 }

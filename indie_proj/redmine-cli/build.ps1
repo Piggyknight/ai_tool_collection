@@ -26,7 +26,8 @@ try {
 
 # Build Windows AMD64 executable
 Write-Host "Building Windows AMD64 executable..." -ForegroundColor Yellow
-go build -ldflags "$ldflags" -trimpath -o $outputFile ./cmd/red-cli/
+$env:GOPROXY = "https://goproxy.cn,direct"
+go build -ldflags "$ldflags" -trimpath -o $outputFile ./cmd/red/
 
 # Verify the build
 if (Test-Path $outputFile) {

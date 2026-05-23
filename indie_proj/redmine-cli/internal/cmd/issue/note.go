@@ -3,6 +3,7 @@ package issue
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/MrJeffLarry/redmine-cli/internal/api"
 	"github.com/MrJeffLarry/redmine-cli/internal/config"
@@ -20,6 +21,21 @@ func cmdIssueNoteRun(r *config.Red_t, cmd *cobra.Command, args []string) {
 	}
 
 	msg, _ := cmd.Flags().GetString("message")
+	msgFile, _ := cmd.Flags().GetString("message-file")
+	if msg != "" && msgFile != "" {
+		fmt.Println("Please use either --message or --message-file, not both")
+		return
+	}
+
+	if msgFile != "" {
+		body, err := os.ReadFile(msgFile)
+		if err != nil {
+			print.Error("Could not read message file: %s", err.Error())
+			return
+		}
+		msg = string(body)
+	}
+
 	if msg == "" {
 		// open editor for message
 		msg = editor.StartEdit(r.Config.Editor, "")
@@ -77,6 +93,7 @@ func cmdIssueNote(r *config.Red_t) *cobra.Command {
 	}
 
 	cmd.Flags().StringP("message", "m", "", "Message to post as a note (if empty opens editor)")
+	cmd.Flags().String("message-file", "", "Read note message from a file")
 	cmd.Flags().BoolP("private", "p", false, "Post the note as private (private_notes)")
 	return cmd
 }

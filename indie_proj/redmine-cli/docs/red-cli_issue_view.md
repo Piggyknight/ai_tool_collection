@@ -17,6 +17,7 @@ red-cli issue view [id] [flags]
 
 ```
   -h, --help       help for view
+      --json       Output in JSON format
   -j, --journals   Display journals
 ```
 
@@ -31,4 +32,3 @@ red-cli issue view [id] [flags]
 ### SEE ALSO
 
 * [red-cli issue](./red-cli_issue.md)	 - issue
-

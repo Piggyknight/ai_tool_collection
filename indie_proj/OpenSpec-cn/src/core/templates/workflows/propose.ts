@@ -21,16 +21,27 @@ export function getOpsxProposeSkillTemplate(): SkillTemplate {
 
 ---
 
-**输入**：用户的请求应包含变更名称（kebab-case）或对他们想要构建内容的描述。
+**输入**：用户的请求应包含变更名称（kebab-case）、对他们想要构建内容的描述，或 Redmine 单号引用（例如：\`#12\`、\`redmine:#12\`、\`redmine:12\`）。当 Redmine 单号后还有额外文字时，将这些文字作为用户补充说明。
 
 **步骤**
 
-1. **如果没有提供明确的输入，询问他们想要构建什么**
+1. **解析输入并准备变更上下文**
 
-   使用 **AskUserQuestion tool**（开放式，无预设选项）询问：
-   > "您想要处理什么变更？请描述您想要构建或修复的内容。"
+   - 如果没有提供明确的输入，使用 **AskUserQuestion tool**（开放式，无预设选项）询问：
+     > "您想要处理什么变更？请描述您想要构建或修复的内容。"
 
-   根据他们的描述，推导出一个 kebab-case 名称（例如："add user authentication" → \`add-user-auth\`）。
+   - 如果第一个参数匹配 Redmine 单号引用（\`#12\`、\`redmine:#12\`、\`redmine:12\`），解析出数字 issue ID，并运行：
+     \`\`\`bash
+     red-cli issue view <issue-id> --json
+     \`\`\`
+     解析返回的 JSON：
+     - 使用 \`issue.subject\` 作为任务标题，并由它推导 kebab-case 名称片段
+     - Redmine 驱动的变更名称必须包含单号，格式为 \`redmine-<issue-id>-<subject-kebab>\`（例如：\`redmine-12-add-login-audit\`），便于核对和查找
+     - 使用 \`issue.description\` 作为 Redmine 原始需求描述
+     - 将 Redmine 标题、描述、状态、优先级、指派人、跟踪器，以及用户在单号后追加的额外描述一起作为规划上下文
+     - 如果 Redmine 未配置或读取失败，清楚说明失败原因，并询问用户是否改为手动输入；不要静默创建缺少 Redmine 上下文的提案
+
+   - 如果输入不是 Redmine 单号引用，根据用户描述推导出一个 kebab-case 名称（例如："add user authentication" → \`add-user-auth\`）。
 
    **重要提示**：在不了解用户想要构建什么的情况下，请勿继续。
 
@@ -39,6 +50,15 @@ export function getOpsxProposeSkillTemplate(): SkillTemplate {
    openspec-cn new change "<name>"
    \`\`\`
    这将在 \`openspec/changes/<name>/\` 创建一个带有 \`.openspec.yaml\` 的脚手架变更。
+
+   如果本次变更来自 Redmine 单号，更新 \`openspec/changes/<name>/.openspec.yaml\`，保留关联信息：
+   \`\`\`yaml
+   redmine:
+     issueId: <issue-id>
+     changeName: "<name>"
+     subject: "<issue.subject>"
+     status: "<issue.status.name>"
+   \`\`\`
 
 3. **获取产出物构建顺序**
    \`\`\`bash
@@ -67,7 +87,7 @@ export function getOpsxProposeSkillTemplate(): SkillTemplate {
         - \`outputPath\`：写入产出物的位置
         - \`dependencies\`：已完成的产出物，用于读取上下文
       - 读取任何已完成的依赖文件以获取上下文
-      - 使用 \`template\` 作为结构创建产出物文件
+      - 使用 \`template\` 作为结构创建产出物文件；如果有 Redmine 上下文，必须将 Redmine 描述和用户额外描述一起纳入分析与规划
       - 应用 \`context\` 和 \`rules\` 作为约束 - 但不要将它们复制到文件中
       - 显示简短进度："✓ 已创建 <artifact-id>"
 
@@ -132,16 +152,27 @@ export function getOpsxProposeCommandTemplate(): CommandTemplate {
 
 ---
 
-**输入**：\`/opsx:propose\` 之后的参数是变更名称（kebab-case），或用户想要构建内容的描述。
+**输入**：\`/opsx:propose\` 之后的参数是变更名称（kebab-case）、用户想要构建内容的描述，或 Redmine 单号引用（例如：\`#12\`、\`redmine:#12\`、\`redmine:12\`）。当 Redmine 单号后还有额外文字时，将这些文字作为用户补充说明。
 
 **步骤**
 
-1. **如果没有提供输入，询问他们想要构建什么**
+1. **解析输入并准备变更上下文**
 
-   使用 **AskUserQuestion tool**（开放式，无预设选项）询问：
-   > "您想要处理什么变更？请描述您想要构建或修复的内容。"
+   - 如果没有提供输入，使用 **AskUserQuestion tool**（开放式，无预设选项）询问：
+     > "您想要处理什么变更？请描述您想要构建或修复的内容。"
 
-   根据他们的描述，推导出一个 kebab-case 名称（例如："add user authentication" → \`add-user-auth\`）。
+   - 如果第一个参数匹配 Redmine 单号引用（\`#12\`、\`redmine:#12\`、\`redmine:12\`），解析出数字 issue ID，并运行：
+     \`\`\`bash
+     red-cli issue view <issue-id> --json
+     \`\`\`
+     解析返回的 JSON：
+     - 使用 \`issue.subject\` 作为任务标题，并由它推导 kebab-case 名称片段
+     - Redmine 驱动的变更名称必须包含单号，格式为 \`redmine-<issue-id>-<subject-kebab>\`（例如：\`redmine-12-add-login-audit\`），便于核对和查找
+     - 使用 \`issue.description\` 作为 Redmine 原始需求描述
+     - 将 Redmine 标题、描述、状态、优先级、指派人、跟踪器，以及用户在单号后追加的额外描述一起作为规划上下文
+     - 如果 Redmine 未配置或读取失败，清楚说明失败原因，并询问用户是否改为手动输入；不要静默创建缺少 Redmine 上下文的提案
+
+   - 如果输入不是 Redmine 单号引用，根据用户描述推导出一个 kebab-case 名称（例如："add user authentication" → \`add-user-auth\`）。
 
    **重要提示**：在不了解用户想要构建什么的情况下，请勿继续。
 
@@ -150,6 +181,15 @@ export function getOpsxProposeCommandTemplate(): CommandTemplate {
    openspec-cn new change "<name>"
    \`\`\`
    这将在 \`openspec/changes/<name>/\` 创建一个带有 \`.openspec.yaml\` 的脚手架变更。
+
+   如果本次变更来自 Redmine 单号，更新 \`openspec/changes/<name>/.openspec.yaml\`，保留关联信息：
+   \`\`\`yaml
+   redmine:
+     issueId: <issue-id>
+     changeName: "<name>"
+     subject: "<issue.subject>"
+     status: "<issue.status.name>"
+   \`\`\`
 
 3. **获取产出物构建顺序**
    \`\`\`bash
@@ -178,7 +218,7 @@ export function getOpsxProposeCommandTemplate(): CommandTemplate {
         - \`outputPath\`：写入产出物的位置
         - \`dependencies\`：已完成的产出物，用于读取上下文
       - 读取任何已完成的依赖文件以获取上下文
-      - 使用 \`template\` 作为结构创建产出物文件
+      - 使用 \`template\` 作为结构创建产出物文件；如果有 Redmine 上下文，必须将 Redmine 描述和用户额外描述一起纳入分析与规划
       - 应用 \`context\` 和 \`rules\` 作为约束 - 但不要将它们复制到文件中
       - 显示简短进度："✓ 已创建 <artifact-id>"
 

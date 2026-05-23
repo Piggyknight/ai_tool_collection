@@ -16,9 +16,10 @@ red-cli issue note [id] [flags]
 ### Options
 
 ```
-  -h, --help             help for note
-  -m, --message string   Message to post as a note (if empty opens editor)
-  -p, --private          Post the note as private (private_notes)
+  -h, --help                  help for note
+      --message-file string   Read note message from a file
+  -m, --message string        Message to post as a note (if empty opens editor)
+  -p, --private               Post the note as private (private_notes)
 ```
 
 ### Options inherited from parent commands
@@ -32,4 +33,3 @@ red-cli issue note [id] [flags]
 ### SEE ALSO
 
 * [red-cli issue](./red-cli_issue.md)	 - issue
-
