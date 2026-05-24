@@ -214,10 +214,9 @@ Old instructions content
 
       const content = await fs.readFile(exploreCmd, 'utf-8');
       expect(content).toContain('---');
-      expect(content).toContain('name:');
       expect(content).toContain('description:');
-      expect(content).toContain('category:');
-      expect(content).toContain('tags:');
+      expect(content).toContain('argument-hint: "[command arguments]"');
+      expect(content).toContain('用户提供的参数：$ARGUMENTS');
     });
 
     it('should update core profile opsx commands when tool is configured', async () => {
@@ -633,7 +632,7 @@ Legacy content without generatedBy
 
       // Should show "unknown → version" in the update message - version info is in separate line
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('1.3.1')
+        expect.stringContaining('1.4.0')
       );
 
       consoleSpy.mockRestore();
@@ -663,7 +662,7 @@ Old version content
 
       // Should show version transition
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('0.1.0 → 1.3.1')
+        expect.stringContaining('0.1.0 → 1.4.0')
       );
 
       consoleSpy.mockRestore();

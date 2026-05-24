@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { transformToHyphenCommands } from '../../src/utils/command-references.js';
+import { transformToClaudeCodeInstructions, transformToHyphenCommands } from '../../src/utils/command-references.js';
 
 describe('transformToHyphenCommands', () => {
   describe('basic transformations', () => {
@@ -79,5 +79,27 @@ Finally /opsx-apply to implement`;
         expect(transformToHyphenCommands(`/opsx:${cmd}`)).toBe(`/opsx-${cmd}`);
       });
     }
+  });
+});
+
+describe('transformToClaudeCodeInstructions', () => {
+  it('should replace non-Claude user question tool references', () => {
+    const input = `使用 **AskUserQuestion tool**（开放式，无预设选项）询问：
+使用 **AskUserQuestion tool** 让用户选择
+使用 **AskUserQuestion tool** 确认
+使用 **AskUserQuestion tool** 进行澄清`;
+
+    const output = transformToClaudeCodeInstructions(input);
+
+    expect(output).toContain('直接向用户提出开放式问题：');
+    expect(output).toContain('直接列出候选项并请用户选择');
+    expect(output).toContain('直接向用户确认');
+    expect(output).toContain('直接向用户提出澄清问题');
+    expect(output).not.toContain('AskUserQuestion');
+  });
+
+  it('should replace TodoWrite wording with Claude Code wording', () => {
+    const output = transformToClaudeCodeInstructions('使用 **TodoWrite tool** 跟踪进度');
+    expect(output).toBe('使用 Claude Code 的待办能力 跟踪进度');
   });
 });

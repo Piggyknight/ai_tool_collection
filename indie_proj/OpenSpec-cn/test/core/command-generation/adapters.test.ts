@@ -51,22 +51,26 @@ describe('command-generation/adapters', () => {
       expect(claudeAdapter.getFilePath('bulk-archive')).toBe(path.join('.claude', 'commands', 'opsx', 'bulk-archive.md'));
     });
 
-    it('should format file with correct YAML frontmatter', () => {
+    it('should format file with Claude Code frontmatter and arguments', () => {
       const output = claudeAdapter.formatFile(sampleContent);
 
       expect(output).toContain('---\n');
-      expect(output).toContain('name: OpenSpec Explore');
       expect(output).toContain('description: Enter explore mode for thinking');
-      expect(output).toContain('category: Workflow');
-      expect(output).toContain('tags: [workflow, explore, experimental]');
+      expect(output).toContain('argument-hint: "[command arguments]"');
       expect(output).toContain('---\n\n');
+      expect(output).toContain('用户提供的参数：$ARGUMENTS');
       expect(output).toContain('This is the command body.\n\nWith multiple lines.');
     });
 
-    it('should handle empty tags', () => {
-      const contentNoTags: CommandContent = { ...sampleContent, tags: [] };
-      const output = claudeAdapter.formatFile(contentNoTags);
-      expect(output).toContain('tags: []');
+    it('should transform generic question tool wording for Claude Code', () => {
+      const content: CommandContent = {
+        ...sampleContent,
+        body: '使用 **AskUserQuestion tool**（开放式，无预设选项）询问：\n使用 **TodoWrite tool** 跟踪。',
+      };
+      const output = claudeAdapter.formatFile(content);
+      expect(output).toContain('直接向用户提出开放式问题：');
+      expect(output).toContain('使用 Claude Code 的待办能力');
+      expect(output).not.toContain('AskUserQuestion tool');
     });
   });
 

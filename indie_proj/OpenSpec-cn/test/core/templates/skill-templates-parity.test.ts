@@ -50,8 +50,8 @@ const EXPECTED_FUNCTION_HASHES: Record<string, string> = {
   getOpsxOnboardCommandTemplate: 'c759a5b5751b77e47c4f53c22938189a79c54a0ce647df3eda82c59b33754c87',
   getOpsxBulkArchiveCommandTemplate: '6fc1eacbe475036088b94120769be59e4e98fd1980cb91bf7c98235331f5db4d',
   getOpsxVerifyCommandTemplate: 'c958655ba5361104629b2209a5ecba82108af85e20458c2b7c8bb1efc8f75bc1',
-  getOpsxProposeSkillTemplate: '6259b83860ba72b40ff16cfdd5c585b421ad42c00cd54e7dce8fa6e95b50b687',
-  getOpsxProposeCommandTemplate: '6dd4641ba5192c99233f37b93eef83cd640c9087cec7188e92891fdb7e83929a',
+  getOpsxProposeSkillTemplate: '86713fde6dbaa6be1f996d1c3505e361b9be4e757c946f727dc8958a8a61bed2',
+  getOpsxProposeCommandTemplate: 'af4c1de01d21d81806ebd7e745653a0017aa99ed154b1d7ee03c915e77aa505b',
   getFeedbackSkillTemplate: 'a2ee906458fa2cad42096fe0ec40000f3acfd5534d91bd48079ff3a19af914e3',
 };
 
@@ -66,7 +66,7 @@ const EXPECTED_GENERATED_SKILL_CONTENT_HASHES: Record<string, string> = {
   'openspec-bulk-archive-change': '4edc5c8f24005fe5ec19d71695184908f1a6239cd89021cf276f100bfc0742b0',
   'openspec-verify-change': '48e9c729e2b67c938418a6812ec12a8f201ec168bb10dbb241a00695a2b02fa2',
   'openspec-onboard': '0e41d9b7c171b6ab784a424e4965afbd1b26d4c71c19d911bec42a7d48192b35',
-  'openspec-propose': '2f3fe67ac604c4121a22862a1d224475cbcc22b08ae1b0adfad6f4233c97f48d',
+  'openspec-propose': '4278ce86cf17958e1bed5877e6418d893f4923f318684dd90b3142309f248de4',
 };
 
 function stableStringify(value: unknown): string {
@@ -157,7 +157,8 @@ describe('skill templates split parity', () => {
 
     for (const content of [skill, command]) {
       expect(content).toContain('Redmine 单号引用');
-      expect(content).toContain('`#12`');
+      expect(content).toContain('`redmine:#12`');
+      expect(content).toContain('普通 `#12` 视为用户描述的一部分');
       expect(content).toContain('red-cli issue view <issue-id> --json');
       expect(content).toContain('`issue.subject`');
       expect(content).toContain('`redmine-<issue-id>-<subject-kebab>`');

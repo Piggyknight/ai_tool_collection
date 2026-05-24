@@ -20,7 +20,9 @@ describe('command-generation/generator', () => {
 
       expect(result.path).toContain('.claude');
       expect(result.path).toContain('explore.md');
-      expect(result.fileContent).toContain('name: OpenSpec Explore');
+      expect(result.fileContent).toContain('description: 进入探索模式');
+      expect(result.fileContent).toContain('argument-hint: "[command arguments]"');
+      expect(result.fileContent).toContain('用户提供的参数：$ARGUMENTS');
       expect(result.fileContent).toContain('Command body here.');
     });
 
@@ -98,13 +100,13 @@ describe('command-generation/generator', () => {
 
       const results = generateCommands(contents, claudeAdapter);
 
-      expect(results[0].fileContent).toContain('name: A');
+      expect(results[0].fileContent).toContain('description: DA');
       expect(results[0].fileContent).toContain('B1');
-      expect(results[0].fileContent).not.toContain('name: B');
+      expect(results[0].fileContent).not.toContain('description: DB');
 
-      expect(results[1].fileContent).toContain('name: B');
+      expect(results[1].fileContent).toContain('description: DB');
       expect(results[1].fileContent).toContain('B2');
-      expect(results[1].fileContent).not.toContain('name: A');
+      expect(results[1].fileContent).not.toContain('description: DA');
     });
   });
 });

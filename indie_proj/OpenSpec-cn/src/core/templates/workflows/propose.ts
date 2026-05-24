@@ -21,7 +21,7 @@ export function getOpsxProposeSkillTemplate(): SkillTemplate {
 
 ---
 
-**输入**：用户的请求应包含变更名称（kebab-case）、对他们想要构建内容的描述，或 Redmine 单号引用（例如：\`#12\`、\`redmine:#12\`、\`redmine:12\`）。当 Redmine 单号后还有额外文字时，将这些文字作为用户补充说明。
+**输入**：用户的请求应包含变更名称（kebab-case）、对他们想要构建内容的描述，或显式 Redmine 单号引用（例如：\`redmine:#12\`、\`redmine:12\`）。只有带 \`redmine:\` 前缀的输入才按 Redmine 处理；普通 \`#12\` 视为用户描述的一部分。当 Redmine 单号后还有额外文字时，将这些文字作为用户补充说明。
 
 **步骤**
 
@@ -30,7 +30,7 @@ export function getOpsxProposeSkillTemplate(): SkillTemplate {
    - 如果没有提供明确的输入，使用 **AskUserQuestion tool**（开放式，无预设选项）询问：
      > "您想要处理什么变更？请描述您想要构建或修复的内容。"
 
-   - 如果第一个参数匹配 Redmine 单号引用（\`#12\`、\`redmine:#12\`、\`redmine:12\`），解析出数字 issue ID，并运行：
+   - 如果第一个参数匹配显式 Redmine 单号引用（\`redmine:#12\`、\`redmine:12\`），解析出数字 issue ID，并运行：
      \`\`\`bash
      red-cli issue view <issue-id> --json
      \`\`\`
@@ -152,7 +152,7 @@ export function getOpsxProposeCommandTemplate(): CommandTemplate {
 
 ---
 
-**输入**：\`/opsx:propose\` 之后的参数是变更名称（kebab-case）、用户想要构建内容的描述，或 Redmine 单号引用（例如：\`#12\`、\`redmine:#12\`、\`redmine:12\`）。当 Redmine 单号后还有额外文字时，将这些文字作为用户补充说明。
+**输入**：\`/opsx:propose\` 之后的参数是变更名称（kebab-case）、用户想要构建内容的描述，或显式 Redmine 单号引用（例如：\`redmine:#12\`、\`redmine:12\`）。只有带 \`redmine:\` 前缀的输入才按 Redmine 处理；普通 \`#12\` 视为用户描述的一部分。当 Redmine 单号后还有额外文字时，将这些文字作为用户补充说明。
 
 **步骤**
 
@@ -161,7 +161,7 @@ export function getOpsxProposeCommandTemplate(): CommandTemplate {
    - 如果没有提供输入，使用 **AskUserQuestion tool**（开放式，无预设选项）询问：
      > "您想要处理什么变更？请描述您想要构建或修复的内容。"
 
-   - 如果第一个参数匹配 Redmine 单号引用（\`#12\`、\`redmine:#12\`、\`redmine:12\`），解析出数字 issue ID，并运行：
+   - 如果第一个参数匹配显式 Redmine 单号引用（\`redmine:#12\`、\`redmine:12\`），解析出数字 issue ID，并运行：
      \`\`\`bash
      red-cli issue view <issue-id> --json
      \`\`\`

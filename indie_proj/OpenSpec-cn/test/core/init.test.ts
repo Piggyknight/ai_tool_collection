@@ -366,8 +366,9 @@ describe('InitCommand', () => {
 
       // Claude commands use YAML frontmatter
       expect(content).toMatch(/^---\n/);
-      expect(content).toContain('name:');
       expect(content).toContain('description:');
+      expect(content).toContain('argument-hint: "[command arguments]"');
+      expect(content).toContain('用户提供的参数：$ARGUMENTS');
     });
 
     it('should generate Cursor commands with correct format', async () => {
