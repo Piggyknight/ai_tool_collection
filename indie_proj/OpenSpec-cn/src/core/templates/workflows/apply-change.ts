@@ -51,13 +51,13 @@ export function getApplyChangeSkillTemplate(): SkillTemplate {
    - 否则：继续实现
 
    **Redmine 状态同步（如果已关联）：**
-   - 读取 \`openspec/changes/<name>/.openspec.yaml\`
-   - 如果存在 \`redmine.issueId\`，在开始第一个实现任务前运行：
+   - \`openspec-cn instructions apply\` 会读取 \`openspec/changes/<name>/.openspec.yaml\`
+   - 如果存在 \`redmine.issueId\` 且状态为 \`ready\`，CLI 会在返回指令前调用：
      \`\`\`bash
      red-cli issue edit <issue-id> --status "Applying"
      \`\`\`
-   - 如果状态更新成功，显示："✓ Redmine issue #<issue-id> 已更新为 Applying"
-   - 如果更新失败，清楚显示失败原因；不要隐藏同步失败，但可以在用户确认后继续本地实现
+   - 如果 JSON 中存在 \`redmineSync.updated: true\`，显示："✓ Redmine issue #<issue-id> 已更新为 Applying"
+   - 如果 JSON 中存在 \`redmineSync.error\`，清楚显示失败原因；不要隐藏同步失败，但可以在用户确认后继续本地实现
 
 4. **阅读上下文文件**
 
@@ -217,13 +217,13 @@ export function getOpsxApplyCommandTemplate(): CommandTemplate {
    - 否则：继续实现
 
    **Redmine 状态同步（如果已关联）：**
-   - 读取 \`openspec/changes/<name>/.openspec.yaml\`
-   - 如果存在 \`redmine.issueId\`，在开始第一个实现任务前运行：
+   - \`openspec-cn instructions apply\` 会读取 \`openspec/changes/<name>/.openspec.yaml\`
+   - 如果存在 \`redmine.issueId\` 且状态为 \`ready\`，CLI 会在返回指令前调用：
      \`\`\`bash
      red-cli issue edit <issue-id> --status "Applying"
      \`\`\`
-   - 如果状态更新成功，显示："✓ Redmine issue #<issue-id> 已更新为 Applying"
-   - 如果更新失败，清楚显示失败原因；不要隐藏同步失败，但可以在用户确认后继续本地实现
+   - 如果 JSON 中存在 \`redmineSync.updated: true\`，显示："✓ Redmine issue #<issue-id> 已更新为 Applying"
+   - 如果 JSON 中存在 \`redmineSync.error\`，清楚显示失败原因；不要隐藏同步失败，但可以在用户确认后继续本地实现
 
 4. **阅读上下文文件**
 

@@ -15,6 +15,7 @@ import {
   resolveArtifactOutputs,
   type ArtifactInstructions,
 } from '../../core/artifact-graph/index.js';
+import { syncChangeRedmineStatus } from '../../core/redmine/workflow-sync.js';
 import {
   validateChangeExists,
   validateSchemaExists,
@@ -36,6 +37,7 @@ export interface ApplyInstructionsOptions {
   change?: string;
   schema?: string;
   json?: boolean;
+  redmineSync?: boolean;
 }
 
 // -----------------------------------------------------------------------------
@@ -353,6 +355,12 @@ export async function applyInstructionsCommand(options: ApplyInstructionsOptions
 
     // generateApplyInstructions uses loadChangeContext which auto-detects schema
     const instructions = await generateApplyInstructions(projectRoot, changeName, options.schema);
+    if (options.redmineSync !== false && instructions.state === 'ready') {
+      const syncResult = await syncChangeRedmineStatus(instructions.changeDir, 'applying', { projectRoot });
+      if (!syncResult.skippedReason) {
+        instructions.redmineSync = syncResult;
+      }
+    }
 
     spinner?.stop();
 
@@ -369,7 +377,7 @@ export async function applyInstructionsCommand(options: ApplyInstructionsOptions
 }
 
 export function printApplyInstructionsText(instructions: ApplyInstructions): void {
-  const { changeName, schemaName, contextFiles, progress, tasks, state, missingArtifacts, instruction } = instructions;
+  const { changeName, schemaName, contextFiles, progress, tasks, state, missingArtifacts, instruction, redmineSync } = instructions;
 
   console.log(`## 应用： ${changeName}`);
   console.log(`Schema： ${schemaName}`);
@@ -420,4 +428,13 @@ export function printApplyInstructionsText(instructions: ApplyInstructions): voi
   // Instruction
   console.log('指令：');
   console.log(instruction);
+
+  if (redmineSync) {
+    console.log();
+    if (redmineSync.updated) {
+      console.log(`✓ Redmine issue #${redmineSync.issueId} 已更新为 ${redmineSync.status}`);
+    } else if (redmineSync.error) {
+      console.log(`Redmine 同步失败：${redmineSync.error}`);
+    }
+  }
 }

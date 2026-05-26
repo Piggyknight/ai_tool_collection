@@ -279,7 +279,8 @@ program
   .option('-y, --yes', '跳过确认提示')
   .option('--skip-specs', '跳过规范更新操作（适用于基础设施、工具或仅文档更改）')
   .option('--no-validate', '跳过验证（不推荐，需要确认）')
-  .action(async (changeName?: string, options?: { yes?: boolean; skipSpecs?: boolean; noValidate?: boolean; validate?: boolean }) => {
+  .option('--no-redmine-sync', '跳过 Redmine 状态和归档说明同步')
+  .action(async (changeName?: string, options?: { yes?: boolean; skipSpecs?: boolean; noValidate?: boolean; validate?: boolean; redmineSync?: boolean }) => {
     try {
       const archiveCommand = new ArchiveCommand();
       await archiveCommand.execute(changeName, options);
@@ -451,6 +452,7 @@ program
   .option('--change <id>', '变更名称')
   .option('--schema <name>', 'Schema 覆盖（从 config.yaml 自动检测）')
   .option('--json', '以 JSON 格式输出')
+  .option('--no-redmine-sync', '当 artifact 为 apply 时跳过 Redmine 状态同步')
   .action(async (artifactId: string | undefined, options: InstructionsOptions) => {
     try {
       // Special case: "apply" is not an artifact, but a command to get apply instructions

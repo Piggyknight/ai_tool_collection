@@ -9,6 +9,12 @@ import {
   writeUpdatedSpec,
   type SpecUpdate,
 } from './specs-apply.js';
+import { resolveSchemaForChange } from '../utils/change-metadata.js';
+import {
+  createArchiveRedmineNote,
+  getChangeRedmineIssue,
+  syncArchivedChangeToRedmine,
+} from './redmine/workflow-sync.js';
 
 /**
  * Recursively copy a directory. Used when fs.rename fails (e.g. EPERM on Windows).
@@ -50,9 +56,16 @@ async function moveDirectory(src: string, dest: string): Promise<void> {
 export class ArchiveCommand {
   async execute(
     changeName?: string,
-    options: { yes?: boolean; skipSpecs?: boolean; noValidate?: boolean; validate?: boolean } = {}
+    options: {
+      yes?: boolean;
+      skipSpecs?: boolean;
+      noValidate?: boolean;
+      validate?: boolean;
+      redmineSync?: boolean;
+    } = {}
   ): Promise<void> {
     const targetPath = '.';
+    const projectRoot = path.resolve(targetPath);
     const changesDir = path.join(targetPath, 'openspec', 'changes');
     const archiveDir = path.join(changesDir, 'archive');
     const mainSpecsDir = path.join(targetPath, 'openspec', 'specs');
@@ -267,6 +280,8 @@ export class ArchiveCommand {
     // Create archive directory with date prefix
     const archiveName = `${this.getArchiveDate()}-${changeName}`;
     const archivePath = path.join(archiveDir, archiveName);
+    const redmineSyncEnabled = options.redmineSync !== false;
+    let redmineNotePath: string | undefined;
 
     // Check if archive already exists
     try {
@@ -278,6 +293,21 @@ export class ArchiveCommand {
       }
     }
 
+    if (redmineSyncEnabled) {
+      const redmineIssue = await getChangeRedmineIssue(changeDir);
+      if (redmineIssue) {
+        const schemaName = resolveSchemaForChange(changeDir);
+        redmineNotePath = await createArchiveRedmineNote({
+          changeName,
+          changeDir,
+          archivePath,
+          schemaName,
+          issueId: redmineIssue.issueId,
+          progress,
+        });
+      }
+    }
+
     // Create archive directory if needed
     await fs.mkdir(archiveDir, { recursive: true });
 
@@ -285,6 +315,16 @@ export class ArchiveCommand {
     await moveDirectory(changeDir, archivePath);
 
     console.log(`更改 '${changeName}' 已归档为 '${archiveName}'。`);
+
+    if (redmineSyncEnabled && redmineNotePath) {
+      const result = await syncArchivedChangeToRedmine(archivePath, redmineNotePath, { projectRoot });
+      if (result.updated) {
+        console.log(chalk.green(`✓ Redmine issue #${result.issueId} 已添加归档说明并更新为 ${result.status}`));
+      } else if (result.error) {
+        console.log(chalk.yellow(`Redmine 同步失败：${result.error}`));
+        console.log(chalk.yellow(`归档说明已保留：${redmineNotePath}`));
+      }
+    }
   }
 
   private async selectChange(changesDir: string): Promise<string | null> {

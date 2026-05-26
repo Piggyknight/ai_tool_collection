@@ -274,6 +274,17 @@ export class RedmineCliWrapper {
   }
 
   /**
+   * Add a note to an issue from a file.
+   */
+  async addNoteFromFile(id: number, noteFile: string, isPrivate: boolean = false): Promise<void> {
+    const args: string[] = ['issue', 'note', id.toString(), '--message-file', noteFile];
+    if (isPrivate) {
+      args.push('--private');
+    }
+    await this.execute(args);
+  }
+
+  /**
    * Add a note to an issue (alias for consistency)
    */
   async addIssueNote(id: number, note: string): Promise<void> {
