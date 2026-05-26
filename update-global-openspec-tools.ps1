@@ -1,7 +1,7 @@
 # Update global OpenSpec-cn and red-cli tooling from the local indie_proj checkout.
 
 param(
-    [string]$IndieProj = "G:\tools\ai_tool_collection\indie_proj",
+    [string]$IndieProj = (Join-Path $PSScriptRoot "indie_proj"),
     [string]$GlobalRoot = $HOME,
     [string]$Tools = "codex,claude",
     [switch]$Watch,
@@ -140,22 +140,9 @@ function Update-GlobalOpenSpecTools {
     if (-not $SkipArtifactUpdate) {
         Ensure-Directory $globalOpenSpecDir
         $openspecCmd = Join-Path $toolBinDir "openspec.cmd"
-        $artifactArgs = @()
+        $artifactArgs = @("init", $GlobalRoot, "--tools", $Tools, "--profile", "core", "--force")
 
-        $hasGlobalArtifacts = (Test-Path -LiteralPath (Join-Path $GlobalRoot ".codex\prompts")) -or
-            (Test-Path -LiteralPath (Join-Path $GlobalRoot ".claude\commands")) -or
-            (Test-Path -LiteralPath (Join-Path $GlobalRoot ".opencode"))
-
-        if ($hasGlobalArtifacts) {
-            $artifactArgs = @("update", $GlobalRoot)
-            if ($Force) {
-                $artifactArgs += "--force"
-            }
-        } else {
-            $artifactArgs = @("init", $GlobalRoot, "--tools", $Tools, "--force")
-        }
-
-        Write-Host "Refreshing global skills and commands in: $GlobalRoot" -ForegroundColor Cyan
+        Write-Host "Refreshing global skills and commands for tools: $Tools" -ForegroundColor Cyan
         Invoke-Checked -FilePath $openspecCmd -Arguments $artifactArgs -WorkingDirectory $GlobalRoot
     }
 

@@ -14,7 +14,7 @@ async function createTempGlobalConfig(baseDir: string): Promise<{ XDG_CONFIG_HOM
     JSON.stringify({
       profile: 'core',
       delivery: 'both',
-      workflows: ['propose', 'explore', 'apply', 'archive'],
+      workflows: ['propose', 'explore', 'apply', 'archive', 'update-tools'],
     })
   );
   return { XDG_CONFIG_HOME: configDir };

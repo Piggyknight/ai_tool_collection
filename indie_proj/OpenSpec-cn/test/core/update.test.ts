@@ -155,12 +155,13 @@ Old instructions content
 
       await updateCommand.execute(testDir);
 
-      // Verify core profile skill files were created/updated (propose, explore, apply, archive)
+      // Verify core profile skill files were created/updated.
       const coreSkillNames = [
         'openspec-explore',
         'openspec-apply-change',
         'openspec-archive-change',
         'openspec-propose',
+        'openspec-update-tools',
       ];
 
       for (const skillName of coreSkillNames) {
@@ -232,8 +233,8 @@ Old instructions content
 
       await updateCommand.execute(testDir);
 
-      // Verify core profile commands were created (propose, explore, apply, archive)
-      const coreCommandIds = ['explore', 'apply', 'archive', 'propose'];
+      // Verify core profile commands were created.
+      const coreCommandIds = ['explore', 'apply', 'archive', 'propose', 'update-tools'];
       const commandsDir = path.join(testDir, '.claude', 'commands', 'opsx');
       for (const cmdId of coreCommandIds) {
         const cmdFile = path.join(commandsDir, `${cmdId}.md`);

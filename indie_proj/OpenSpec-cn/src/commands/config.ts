@@ -86,6 +86,10 @@ const WORKFLOW_PROMPT_META: Record<string, WorkflowPromptMeta> = {
     name: '入门指南',
     description: 'OpenSpec 入门引导流程',
   },
+  'update-tools': {
+    name: '更新工具',
+    description: '刷新全局 red-cli、openspec-cn、skills 和命令',
+  },
 };
 
 function isPromptCancellationError(error: unknown): boolean {
